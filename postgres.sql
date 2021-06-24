@@ -21,7 +21,7 @@ CREATE TABLE review_photos (
     REFERENCES reviews (id)
 )
 
-CREATE TABLE characteristic (
+CREATE TABLE characteristics (
   id INT NOT NULL PRIMARY KEY,
   product_id INT,
   characteristic_name VARCHAR,
@@ -37,5 +37,5 @@ CREATE TABLE characteristics_reviews (
   FOREIGN KEY (review_id)
     REFERENCES reviews (id)
   FOREIGN KEY (characteristic_id)
-    REFERENCES characteristic (id)
+    REFERENCES characteristics (id)
 )
