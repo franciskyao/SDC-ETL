@@ -29,7 +29,7 @@ CREATE TABLE characteristic (
     REFERENCES reviews(product_id)
 )
 
-CREATE TABLE characteristics_review (
+CREATE TABLE characteristics_reviews (
   id INT NOT NULL PRIMARY KEY,
   characteristic_id INT,
   review_id INT,
