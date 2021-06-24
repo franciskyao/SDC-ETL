@@ -12,6 +12,10 @@ CREATE TABLE reviews (
   response TEXT,
   helpfulness INT
 )
+COPY reviews(id, product_id, rating, date_created, summary, body,recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+FROM '\csv\reviews.csv'
+DELIMITER ','
+CSV HEADER;
 
 CREATE TABLE review_photos (
   id INT NOT NULL PRIMARY KEY,
@@ -21,6 +25,11 @@ CREATE TABLE review_photos (
     REFERENCES reviews (id)
 )
 
+COPY review_photos(id, review_id, photo_url)
+FROM '\csv\review_photos.csv'
+DELIMITER ','
+CSV HEADER;
+
 CREATE TABLE characteristics (
   id INT NOT NULL PRIMARY KEY,
   product_id INT,
@@ -29,13 +38,23 @@ CREATE TABLE characteristics (
     REFERENCES reviews(product_id)
 )
 
+COPY characteristics(id, product_id, characteristic_name)
+FROM '\csv\characteristics.csv'
+DELIMITER ','
+CSV HEADER;
+
 CREATE TABLE characteristics_reviews (
   id INT NOT NULL PRIMARY KEY,
   characteristic_id INT,
   review_id INT,
-  value INT,
+  characteristic_value INT,
   FOREIGN KEY (review_id)
     REFERENCES reviews (id)
   FOREIGN KEY (characteristic_id)
     REFERENCES characteristics (id)
 )
+
+COPY characteristics_reviews(id, characteristic_id, review_id, characteristic_value)
+FROM '\csv\characteristics_reviews'
+DELIMITER ','
+CSV HEADER;
