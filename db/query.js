@@ -33,6 +33,71 @@ const getList = function(page, count, sort, id, res) {
     })
 }
 
+// const getMeta = function(id, res) {
+//   const meta = {
+//     product_id: id,
+//     ratings: {
+//       1: 0,
+//       2: 0,
+//       3: 0,
+//       4: 0,
+//       5: 0,
+//     },
+//     recommended: {
+//       0: 0,
+//       1: 0,
+//     },
+//     characteristics: {
+//     }
+//   }
+//   pool.connect()
+//     .then(() => {
+//       pool.query(`SELECT * FROM reviews WHERE product = ${id}`)
+//         .then((results) => {
+//           results.rows.forEach((row) => {
+//             meta.ratings[`${row.rating}`]++;
+//             if (row.recommend === false) {
+//               meta.recommended['0']++;
+//             } else if (row.recommend === true) {
+//               meta.recommended['1']++;
+//             }
+//             const joinQ = `
+//             SELECT * FROM characteristics_reviews
+//             JOIN characteristics
+//               ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics_reviews.review_id = ${row.review_id}`
+//             pool.query(joinQ)
+//               .then((results) => {
+//                 results.rows.forEach((row) => {
+                  // if (!meta.characteristics[row.characteristic_name]) {
+                  //   meta.characteristics[row.characteristic_name] = {
+                  //     id: row.id,
+                  //     value: row.characteristic_value,
+                  //     count: 1,
+                  //   }
+                  // } else {
+                  //   meta.characteristics[row.characteristic_name].value = meta.characteristics[row.characteristic_name].value + row.characteristic_value;
+                  //   meta.characteristics[row.characteristic_name].count++;
+//                   }
+//                 })
+//               })
+//               .then(() => {
+//                 console.log(meta.characteristics)
+//                 // console.log(meta)
+//               })
+//               .catch((err) => {
+//                 console.log(err);
+//               })
+//           })
+//         })
+//         .catch((err) => {
+//           console.log(err);
+//         })
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     })
+// }
+
 const getMeta = function(id, res) {
   const meta = {
     product_id: id,
@@ -50,51 +115,43 @@ const getMeta = function(id, res) {
     characteristics: {
     }
   }
+
+  let reviewsResult;
   pool.connect()
-    .then(() => {
-      pool.query(`SELECT * FROM reviews WHERE product = ${id}`)
-        .then((results) => {
-          results.rows.forEach((row) => {
-            meta.ratings[`${row.rating}`]++;
-            if (row.recommend === false) {
-              meta.recommended['0']++;
-            } else if (row.recommend === true) {
-              meta.recommended['1']++;
-            }
-            const joinQ = `
-            SELECT * FROM characteristics_reviews
-            JOIN characteristics
-              ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics_reviews.review_id = ${row.review_id}`
-            pool.query(joinQ)
-              .then((results) => {
-                results.rows.forEach((row) => {
-                  if (!meta.characteristics[row.characteristic_name]) {
-                    meta.characteristics[row.characteristic_name] = {
-                      id: row.id,
-                      value: row.characteristic_value,
-                      count: 1,
-                    }
-                  } else {
-                    meta.characteristics[row.characteristic_name].value = meta.characteristics[row.characteristic_name].value + row.characteristic_value;
-                    meta.characteristics[row.characteristic_name].count++;
-                  }
-                })
-              })
-              .then(() => {
-                console.log(meta.characteristics)
-                // console.log(meta)
-              })
-              .catch((err) => {
-                console.log(err);
-              })
-          })
-        })
-        .catch((err) => {
-          console.log(err);
-        })
+    .then(() => pool.query(`SELECT * FROM reviews WHERE product = ${id}`))
+    .then((results) => {
+      return results.rows.map((row, i) => {
+        meta.ratings[`${row.rating}`]++;
+        if (row.recommend === false) {
+          meta.recommended['0']++;
+        } else if (row.recommend === true) {
+          meta.recommended['1']++;
+        }
+        return pool.query(`SELECT * FROM characteristics_reviews
+          JOIN characteristics ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics_reviews.review_id = ${row.review_id}`)
+      })
     })
-    .catch((err) => {
-      console.log(err);
+    .then((results2) => Promise.all(results2))
+    .then((resultsChar) => {
+      resultsChar.forEach((characteristic) => {
+        const char = characteristic.rows[0];
+        if (!meta.characteristics[char.characteristic_name]) {
+          meta.characteristics[char.characteristic_name] = {
+            id: char.id,
+            value: char.characteristic_value,
+            count: 1,
+          }
+        } else {
+          meta.characteristics[char.characteristic_name].count++;
+          meta.characteristics[char.characteristic_name].value += char.characteristic_value;
+        }
+      })
+      Object.keys(meta.characteristics).forEach((char) => {
+        meta.characteristics[char].value = meta.characteristics[char].value / meta.characteristics[char].count;
+        delete meta.characteristics[char].count;
+      })
+
+      res.send(meta)
     })
 }
 
