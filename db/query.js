@@ -8,29 +8,36 @@ const pool = new Pool ({
   port: 5432,
 })
 
-
 const getList = function(page, count, sort, id, res) {
   const pageStart = page * count;
   const pageEnd = pageStart + count;
-  const queryString = `SELECT * from reviews WHERE product = ${id} AND review_id BETWEEN ${pageStart} AND ${pageEnd}`;
+  const queryString = `SELECT * from reviews WHERE product = ${id} AND review_id BETWEEN ${pageStart} AND ${pageEnd} AND reported = false`;
 
-  const resultObj = {}
-  resultObj.product = id.toString();
-  resultObj.page = page;
-  resultObj.count = count;
+  const reviewResponse = {}
+  reviewResponse.product = id.toString();
+  reviewResponse.page = page;
+  reviewResponse.count = count;
 
   pool.connect()
     .then(() => pool.query(queryString))
     .then((results) => {
-      resultObj.results = results.rows;
-      return results.rows.map((review) => {
-        const photoQuery = `SELECT id, photo_url from review_photos WHERE id = ${review.review_id}`
-        pool.query(photoQuery)
-          .then((photos) => {
-            review.photos = photos.rows
-          })
+      reviewResponse.results = results.rows;
+
+      return results.rows.map((review) => (
+        pool.query(`SELECT id, photo_url from review_photos WHERE id = ${review.review_id}`)
+      ))
+    })
+    .then((mapPromise) => Promise.all(mapPromise))
+    .then((photos) => {
+      photos.forEach((result, i) => {
+        console.log(photos[i])
+        reviewResponse.results[i].photos = result.rows.slice()
       })
-      res.send(resultObj);
+      return reviewResponse;
+    })
+    .then(() => {
+      // console.log(reviewResponse)
+      res.send(reviewResponse);
     })
 }
 
@@ -85,8 +92,8 @@ const getMeta = function(id, res) {
         meta.characteristics[char].value = meta.characteristics[char].value / meta.characteristics[char].count;
         delete meta.characteristics[char].count;
       })
-
-      res.send(meta)
+      res.status(200);
+      res.send(meta);
     })
 }
 
@@ -98,7 +105,6 @@ const updateRating = function (res) {
   // const last = 1000000;
   // const first = 1000001;
   pool.connect()
-    // .then(() => pool.query(`SELECT product, rating FROM reviews`))
     .then(() => pool.query(`SELECT product, rating FROM reviews WHERE review_id >= ${first} and review_id <= ${last}`))
     .then((results) => {
       results.rows.forEach((row, i) => {
