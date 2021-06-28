@@ -77,6 +77,7 @@ const getMeta = function(id, res) {
     .then((resultsChar) => {
       resultsChar.forEach((characteristic) => {
         const char = characteristic.rows[0];
+        console.log(char)
         if (!meta.characteristics[char.characteristic_name]) {
           meta.characteristics[char.characteristic_name] = {
             id: char.id,
@@ -97,36 +98,32 @@ const getMeta = function(id, res) {
     })
 }
 
-const updateRating = function (res) {
-  // cap =5774952
-  // const first = 1;
-  // const last = 500000;
-  // const first = 500001;
-  // const last = 1000000;
-  // const first = 1000001;
+const postReview = function (req, res) {
+  const { product_id, rating, summary, body, recommend, name, email, photos, characteristic } = req.body;
+  const reported = false;
+  const date = new Date();
+  const response = null;
+  const date_created = date.getTime();
+  const helpfulness = 0;
+  const reviewsQ = `INSERT INTO reviews (product, rating, date_created, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness) VALUES (${product_id}, ${rating}, ${date_created}, '${summary}', '${body}', ${recommend}, ${reported}, '${name}', '${email}', ${response}, ${helpfulness})`;
+
   pool.connect()
-    .then(() => pool.query(`SELECT product, rating FROM reviews WHERE review_id >= ${first} and review_id <= ${last}`))
-    .then((results) => {
-      results.rows.forEach((row, i) => {
-        const qString = `INSERT INTO ratings (product_id, r_${row.rating})
-        VALUES (${row.product}, 1)
-        ON CONFLICT (product_id) DO UPDATE
-        SET r_${row.rating} = ratings.r_${row.rating} + 1`
-        pool.query(qString)
-        .then((success) => {
-          console.log('Successfully updated rating', i)
+    .then(() => {
+      pool.query(reviewsQ)
+        .then((result) => console.log(result))
+        .catch((err) => console.log(err))
+
+      if (photos) {
+        photos.forEach(photo => {
+          const photosQ = `INSERT INTO review_photos (review_id, photo_url) VALUES ((SELECT max(id) FROM characteristics_reviews)), '${photo}')`;
+          pool.connect()
+            .then(() => pool.query(photosQ))
         })
-        .catch((err) => {
-          console.log('error in updating values')
-        })
-      })
+      }
+      res.send('Successfully sent in query');
     })
-  .then(() => res.end(''))
-  .catch((err) => {
-    console.log('error')
-  })
 }
 
 module.exports.getList = getList;
 module.exports.getMeta = getMeta;
-module.exports.updateRating = updateRating;
+module.exports.postReview = postReview;

@@ -111,16 +111,28 @@ VALUES (2, 1)
 ON CONFLICT (product_id) DO UPDATE
 SET r_3 = ratings.r_3 + 1;
 
-
 SELECT * FROM characteristics_reviews
-  WHERE review_id = 2
-JOIN characteristics
-  ON characteristics_review.characteristic_id = characteristics.id;
-
-SELECT * FROM characteristics_reviews
-JOIN characteristics
-  ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics.product_id = 2;
-
-SELECT * FROM characteristics_reviews, characteristiccharacteristic_name
 JOIN characteristics
   ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics_reviews.review_id = 2;
+
+SELECT * FROM reviews
+JOIN characteristics_reviews
+  ON reviews.review_id = characteristics_reviews.review_id;
+WHERE reviews.review_id = 2;
+
+
+create sequence review_photos_serial as integer start 2742541 owned by review_photos.id;
+
+alter table review_photos alter column id set default nextval('review_photos_serial');
+
+
+
+create sequence char_serial as integer start 3347680 owned by characteristics.id;
+
+alter table characteristics alter column id set default nextval('char_serial');
+
+create sequence char_rev_serial as integer start 19327576 owned by characteristics_reviews.id;
+
+alter table characteristics_reviews alter column id set default nextval('char_rev_serial');
+
+INSERT INTO reviews (id, product, rating, date_created, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness) VALUES (1, 2, 4, 1624918881761, 'Best purchase ever!', 'I have no idea what this is but I'm reviewing it anyway', true, false, 'John Doe', 'johnDoe@email.com', null, 0);

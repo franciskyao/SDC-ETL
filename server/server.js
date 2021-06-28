@@ -18,13 +18,6 @@ app.get('/reviews/meta', (req, res) => {
   db.getMeta(productId, res);
 })
 
-app.get('/create', (req, res) => {
-  db.updateRating(res);
-  // db.getMeta(productId);
-  // res.send('maybe created?');
-})
-
-
 app.get('/reviews/', (req, res) => {
   const url = new URL(`http://localhost:5000${req.url}`);
   const urlParams = new URLSearchParams(url.search);
@@ -33,7 +26,10 @@ app.get('/reviews/', (req, res) => {
   const sort = urlParams.get('sort');
   const product_id = parseInt(urlParams.get('product_id'));
   db.getList(page, count, sort, product_id, res);
-  // res.send('Test went in /reviews/');
+})
+
+app.post('/reviews', (req, res) => {
+  db.postReview(req, res);
 })
 
 app.listen(port, () => {
