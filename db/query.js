@@ -12,17 +12,18 @@ const pool = new Pool ({
 const getList = function(page, count, sort, id, res) {
   const pageStart = page * count;
   const pageEnd = pageStart + count;
-  const queryString = `SELECT * from reviews WHERE product = ${id} AND review_id BETWEEN ${pageStart} AND ${pageEnd}`
+  const queryString = `SELECT * from reviews WHERE product = ${id} AND review_id BETWEEN ${pageStart} AND ${pageEnd}`;
+
+  const resultObj = {}
+  resultObj.product = id.toString();
+  resultObj.page = page;
+  resultObj.count = count;
+
   pool.connect()
     .then(() => pool.query(queryString))
     .then((results) => {
-      const resultObj = {}
-      resultObj.product = id.toString();
-      resultObj.page = page;
-      resultObj.count = count;
       resultObj.results = results.rows;
-      //maybe join
-      resultObj.results.forEach((review) => {
+      return results.rows.map((review) => {
         const photoQuery = `SELECT id, photo_url from review_photos WHERE id = ${review.review_id}`
         pool.query(photoQuery)
           .then((photos) => {
@@ -32,71 +33,6 @@ const getList = function(page, count, sort, id, res) {
       res.send(resultObj);
     })
 }
-
-// const getMeta = function(id, res) {
-//   const meta = {
-//     product_id: id,
-//     ratings: {
-//       1: 0,
-//       2: 0,
-//       3: 0,
-//       4: 0,
-//       5: 0,
-//     },
-//     recommended: {
-//       0: 0,
-//       1: 0,
-//     },
-//     characteristics: {
-//     }
-//   }
-//   pool.connect()
-//     .then(() => {
-//       pool.query(`SELECT * FROM reviews WHERE product = ${id}`)
-//         .then((results) => {
-//           results.rows.forEach((row) => {
-//             meta.ratings[`${row.rating}`]++;
-//             if (row.recommend === false) {
-//               meta.recommended['0']++;
-//             } else if (row.recommend === true) {
-//               meta.recommended['1']++;
-//             }
-//             const joinQ = `
-//             SELECT * FROM characteristics_reviews
-//             JOIN characteristics
-//               ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics_reviews.review_id = ${row.review_id}`
-//             pool.query(joinQ)
-//               .then((results) => {
-//                 results.rows.forEach((row) => {
-                  // if (!meta.characteristics[row.characteristic_name]) {
-                  //   meta.characteristics[row.characteristic_name] = {
-                  //     id: row.id,
-                  //     value: row.characteristic_value,
-                  //     count: 1,
-                  //   }
-                  // } else {
-                  //   meta.characteristics[row.characteristic_name].value = meta.characteristics[row.characteristic_name].value + row.characteristic_value;
-                  //   meta.characteristics[row.characteristic_name].count++;
-//                   }
-//                 })
-//               })
-//               .then(() => {
-//                 console.log(meta.characteristics)
-//                 // console.log(meta)
-//               })
-//               .catch((err) => {
-//                 console.log(err);
-//               })
-//           })
-//         })
-//         .catch((err) => {
-//           console.log(err);
-//         })
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//     })
-// }
 
 const getMeta = function(id, res) {
   const meta = {
@@ -116,7 +52,6 @@ const getMeta = function(id, res) {
     }
   }
 
-  let reviewsResult;
   pool.connect()
     .then(() => pool.query(`SELECT * FROM reviews WHERE product = ${id}`))
     .then((results) => {
