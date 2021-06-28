@@ -17,8 +17,8 @@ DELIMITER ','
 CSV HEADER;
 
 CREATE TABLE reviews (
-  id INT,
-  product_id INT NOT NULL,
+  review_id INT,
+  product INT NOT NULL,
   rating INT,
   date_created BIGINT,
   summary TEXT,
@@ -29,12 +29,12 @@ CREATE TABLE reviews (
   reviewer_email TEXT,
   response TEXT,
   helpfulness INT,
-  PRIMARY KEY (id),
-  FOREIGN KEY (product_id)
+  PRIMARY KEY (review_id),
+  FOREIGN KEY (product)
     REFERENCES product(id)
 );
 
-COPY reviews(id, product_id, rating, date_created, summary, body,recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
+COPY reviews(review_id, product, rating, date_created, summary, body,recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
 FROM '/home/franciskyao/Downloads/reviews.csv'
 DELIMITER ','
 CSV HEADER;
@@ -45,7 +45,7 @@ CREATE TABLE review_photos (
   photo_url TEXT,
   PRIMARY KEY (id),
   FOREIGN KEY (review_id)
-    REFERENCES reviews(id)
+    REFERENCES reviews(review_id)
 );
 
 COPY review_photos(id, review_id, photo_url)
@@ -76,10 +76,51 @@ CREATE TABLE characteristics_reviews (
   FOREIGN KEY (characteristic_id)
     REFERENCES characteristics(id),
   FOREIGN KEY (review_id)
-    REFERENCES reviews(id)
+    REFERENCES reviews(review_id)
 );
 
 COPY characteristics_reviews(id, characteristic_id, review_id, characteristic_value)
 FROM '/home/franciskyao/Downloads/characteristic_reviews.csv'
 DELIMITER ','
 CSV HEADER;
+
+DROP table ratings;
+
+CREATE TABLE ratings (
+  id SERIAL,
+  product_id INT,
+  r_1 INT default 0,
+  r_2 INT default 0,
+  r_3 INT default 0,
+  r_4 INT default 0,
+  r_5 INT default 0,
+  UNIQUE(product_id),
+  PRIMARY KEY (id)
+);
+
+DELETE FROM ratings;
+
+
+INSERT INTO ratings (product_id, r_2)
+VALUES (2, 1)
+ON CONFLICT (product_id) DO UPDATE
+SET r_2 = excluded.r_2 + 1;
+
+INSERT INTO ratings (product_id, r_3)
+VALUES (2, 1)
+ON CONFLICT (product_id) DO UPDATE
+SET r_3 = ratings.r_3 + 1;
+
+
+SELECT * FROM characteristics_reviews
+  WHERE review_id = 2
+JOIN characteristics
+  ON characteristics_review.characteristic_id = characteristics.id;
+
+SELECT * FROM characteristics_reviews
+JOIN characteristics
+  ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics.product_id = 2;
+
+SELECT * FROM characteristics_reviews, characteristiccharacteristic_name
+JOIN characteristics
+  ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics_reviews.review_id = 2;
