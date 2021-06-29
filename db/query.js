@@ -36,8 +36,8 @@ const getList = function(page, count, sort, id, res) {
       return reviewResponse;
     })
     .then(() => {
-      // console.log(reviewResponse)
-      res.send(reviewResponse);
+      res.status(200);
+      res.send('OK')
     })
 }
 
@@ -94,7 +94,7 @@ const getMeta = function(id, res) {
         delete meta.characteristics[char].count;
       })
       res.status(200);
-      res.send(meta);
+      res.send('OK')
     })
 }
 
@@ -120,10 +120,33 @@ const postReview = function (req, res) {
             .then(() => pool.query(photosQ))
         })
       }
-      res.send('Successfully sent in query');
+      res.status(201);
+      res.send('CREATED')
     })
+}
+
+const putHelpful = function(review_id, res) {
+  pool.connect()
+    .then(() => pool.query(`UPDATE reviews SET helpfulness = helpfulness + 1 WHERE review_id = ${review_id}`))
+    .then((success) => {
+      res.status(204);
+      res.send('NO CONTENT')
+    })
+    .catch((err) => console.log('Failed to update helpfulness'))
+}
+
+const putReport = function(review_id, res) {
+  pool.connect()
+    .then(() => pool.query(`UPDATE reviews SET reported = true WHERE review_id = ${review_id}`))
+    .then((success) => {
+      res.status(204);
+      res.send('NO CONTENT')
+    })
+    .catch((err) => console.log('Failed to update helpfulness'))
 }
 
 module.exports.getList = getList;
 module.exports.getMeta = getMeta;
 module.exports.postReview = postReview;
+module.exports.putHelpful = putHelpful;
+module.exports.putReport = putReport;

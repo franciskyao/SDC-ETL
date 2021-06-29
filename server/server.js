@@ -32,6 +32,16 @@ app.post('/reviews', (req, res) => {
   db.postReview(req, res);
 })
 
+app.put('/reviews/:review_id/helpful', (req, res) => {
+  let review_id = parseInt(req.url.slice(9, req.url.indexOf('/', 9)));
+  db.putHelpful(review_id, res);
+})
+
+app.put('/reviews/:review_id/report', (req, res) => {
+  let review_id = parseInt(req.url.slice(9, req.url.indexOf('/', 9)));
+  db.putReport(review_id, res);
+})
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
