@@ -11,7 +11,15 @@ const pool = new Pool ({
 const getList = function(page, count, sort, id, res) {
   const pageStart = page * count;
   const pageEnd = pageStart + count;
-  const queryString = `SELECT * from reviews WHERE product = ${id} AND review_id BETWEEN ${pageStart} AND ${pageEnd} AND reported = false`;
+  let sortQ = null;
+  if (sort === 'newest') {
+    sortQ = 'review_id DESC';
+  } else if (sort === 'helpful') {
+    sortQ = 'helpfulness DESC';
+  } else {
+    sortQ = 'recommend DESC';
+  }
+  const queryString = `SELECT * FROM reviews WHERE product = ${id} AND review_id BETWEEN ${pageStart} AND ${pageEnd} AND reported = false ORDER BY ${sortQ}`;
 
   const reviewResponse = {}
   reviewResponse.product = id.toString();
@@ -21,6 +29,7 @@ const getList = function(page, count, sort, id, res) {
   pool.connect()
     .then(() => pool.query(queryString))
     .then((results) => {
+      console.log(results.rows)
       reviewResponse.results = results.rows;
 
       return results.rows.map((review) => (
@@ -37,7 +46,7 @@ const getList = function(page, count, sort, id, res) {
     })
     .then(() => {
       res.status(200);
-      res.send('OK')
+      res.send(reviewResponse)
     })
 }
 
@@ -77,7 +86,6 @@ const getMeta = function(id, res) {
     .then((resultsChar) => {
       resultsChar.forEach((characteristic) => {
         const char = characteristic.rows[0];
-        console.log(char)
         if (!meta.characteristics[char.characteristic_name]) {
           meta.characteristics[char.characteristic_name] = {
             id: char.id,
@@ -110,7 +118,7 @@ const postReview = function (req, res) {
   pool.connect()
     .then(() => {
       pool.query(reviewsQ)
-        .then((result) => console.log(result))
+        .then((result) => console.log('OK'))
         .catch((err) => console.log(err))
 
       if (photos) {
