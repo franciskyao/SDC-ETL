@@ -38,6 +38,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./",
           "packageDependencies": [
             ["dev", "npm:0.1.3"],
+            ["dotenv", "npm:10.0.0"],
             ["eslint", "npm:7.29.0"],
             ["eslint-config-airbnb", "virtual:919c36d2fb03a2880c9f0844f5515e17c3ae42e32ddfa1e18f5166811c5b5e233fe076607fae8f1d804ad79ae8c017c0b84ce91a8f75abfa11af8a70a830b152#npm:18.2.1"],
             ["eslint-plugin-import", "virtual:919c36d2fb03a2880c9f0844f5515e17c3ae42e32ddfa1e18f5166811c5b5e233fe076607fae8f1d804ad79ae8c017c0b84ce91a8f75abfa11af8a70a830b152#npm:2.23.4"],
@@ -2618,6 +2619,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["dot-prop", "npm:5.3.0"],
             ["is-obj", "npm:2.0.0"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["dotenv", [
+        ["npm:10.0.0", {
+          "packageLocation": "./.yarn/cache/dotenv-npm-10.0.0-36b272df25-9c45712e21.zip/node_modules/dotenv/",
+          "packageDependencies": [
+            ["dotenv", "npm:10.0.0"]
           ],
           "linkType": "HARD",
         }]
@@ -6517,6 +6527,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [
             ["sdc-etl", "workspace:."],
             ["dev", "npm:0.1.3"],
+            ["dotenv", "npm:10.0.0"],
             ["eslint", "npm:7.29.0"],
             ["eslint-config-airbnb", "virtual:919c36d2fb03a2880c9f0844f5515e17c3ae42e32ddfa1e18f5166811c5b5e233fe076607fae8f1d804ad79ae8c017c0b84ce91a8f75abfa11af8a70a830b152#npm:18.2.1"],
             ["eslint-plugin-import", "virtual:919c36d2fb03a2880c9f0844f5515e17c3ae42e32ddfa1e18f5166811c5b5e233fe076607fae8f1d804ad79ae8c017c0b84ce91a8f75abfa11af8a70a830b152#npm:2.23.4"],
