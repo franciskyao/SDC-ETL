@@ -120,7 +120,6 @@ JOIN characteristics_reviews
   ON reviews.review_id = characteristics_reviews.review_id;
 WHERE reviews.review_id = 2;
 
-
 create sequence review_photos_serial as integer start 2742541 owned by review_photos.id;
 
 alter table review_photos alter column id set default nextval('review_photos_serial');

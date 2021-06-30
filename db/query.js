@@ -26,10 +26,8 @@ const getList = function(page, count, sort, id, res) {
   reviewResponse.page = page;
   reviewResponse.count = count;
 
-  pool.connect()
-    .then(() => pool.query(queryString))
+  pool.query(queryString)
     .then((results) => {
-      console.log(results.rows)
       reviewResponse.results = results.rows;
 
       return results.rows.map((review) => (
@@ -39,7 +37,6 @@ const getList = function(page, count, sort, id, res) {
     .then((mapPromise) => Promise.all(mapPromise))
     .then((photos) => {
       photos.forEach((result, i) => {
-        console.log(photos[i])
         reviewResponse.results[i].photos = result.rows.slice()
       })
       return reviewResponse;
@@ -68,8 +65,7 @@ const getMeta = function(id, res) {
     }
   }
 
-  pool.connect()
-    .then(() => pool.query(`SELECT * FROM reviews WHERE product = ${id}`))
+  pool.query(`SELECT * FROM reviews WHERE product = ${id}`)
     .then((results) => {
       return results.rows.map((row, i) => {
         meta.ratings[`${row.rating}`]++;
@@ -82,9 +78,11 @@ const getMeta = function(id, res) {
           JOIN characteristics ON characteristics_reviews.characteristic_id = characteristics.id AND characteristics_reviews.review_id = ${row.review_id}`)
       })
     })
+    .catch((err) => console.log(err))
     .then((results2) => Promise.all(results2))
+    .catch((err) => console.log(err))
     .then((resultsChar) => {
-      resultsChar.forEach((characteristic) => {
+      resultsChar.forEach((characteristic, i) => {
         const char = characteristic.rows[0];
         if (!meta.characteristics[char.characteristic_name]) {
           meta.characteristics[char.characteristic_name] = {
@@ -102,8 +100,9 @@ const getMeta = function(id, res) {
         delete meta.characteristics[char].count;
       })
       res.status(200);
-      res.send('OK')
+      res.send(meta)
     })
+    .catch((err) => console.log(err))
 }
 
 const postReview = function (req, res) {
@@ -118,8 +117,8 @@ const postReview = function (req, res) {
   pool.connect()
     .then(() => {
       pool.query(reviewsQ)
-        .then((result) => console.log('OK'))
-        .catch((err) => console.log(err))
+        .then((result) => console.log('Post success'))
+        .catch((err) => console.log('Post failed'))
 
       if (photos) {
         photos.forEach(photo => {

@@ -5,7 +5,9 @@
   "main": "server/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server/server.js -w"
+    "start": "nodemon server/server.js -w",
+    "metak6": "k6 run test/metaTest.js",
+    "reviewsk6": "k6 run test/reviewsTest.js"
   },
   "repository": {
     "type": "git",

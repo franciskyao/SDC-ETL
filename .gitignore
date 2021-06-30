@@ -1,6 +1,6 @@
 /csv
 .sql
 .env
-postgres.sql
 
+postgres.sql
 yarn.lock
